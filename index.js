@@ -1,7 +1,15 @@
 const express = require('express'),
   bodyParser = require('body-parser'),
-  morgan = require('morgan');
+  morgan = require('morgan'),
+  mongoose = require('mongoose');
 const app = express();
+
+const Models = require('./models.js');
+
+const Movies = Models.Movie;
+const Users = Models.User;
+
+mongoose.connect('mongodb://localhost:27017/myMoviesDB', {useNewUrlParser: true, useUnifiedTopology: true });
 
 //middleware
 //log requests to console
@@ -11,92 +19,22 @@ app.use(morgan('common'));
 app.use(express.static('public'));
 
 app.use(bodyParser.json());
+/*
+app.post('/users', (req, res) => {
+  res.send('Successful POST request creating a new user');
+});*/
 
-let topMovies = [
-  {
-    title: 'Aliens',
-    director:'Ridley Scott',
-    birth:'September',
-    death: 'Not Dead yet!',
-    genre: 'Horror, Sci-fi'
-  },
-  {
-    title: 'Star Dust',
-    director:'Matthew Vaughn',
-    birth:'September',
-    death: 'Not Dead yet!',
-    genre: 'Fantasy'
-  },
-  {
-    title: 'The Kings Speech',
-    director:'Tom Hooper',
-    birth:'September',
-    death: 'Not Dead yet!',
-    genre: 'Drama'
-  },
-  {
-    title: 'True Grit',
-    director:'Cohen Brothers',
-    birth:'September',
-    death: 'Not Dead yet!',
-    genre: 'Western'
-  },
-  {
-    title: 'Bone Tomahawk',
-    director:'S. Craig Zahler',
-    birth:'September',
-    death: 'Not Dead yet!',
-    genre: 'Western'
-  },
-  {
-    title: 'The Shawshank Redemption',
-    director:'Frank Darabone',
-    birth:'September',
-    death: 'Not Dead yet!',
-    genre: 'Drama'
-  },
-  {
-    title: 'Pulp Fiction',
-    director:'Quentin Tarantino',
-    birth:'September',
-    death: 'Not Dead yet!',
-    genre: 'Action'
-  },
-  {
-    title: 'Fight Club',
-    director:'David FIncher',
-    birth:'September',
-    death: 'Not Dead yet!',
-    genre: 'Action'
-  },
-  {
-    title: 'Forest Gump',
-    director:'Robert Zemeckis',
-    birth:'September',
-    death: 'Not Dead yet!',
-    genre: 'Action'
-  },
-  {
-    title: 'Citizen Kane',
-    director:'Orson Wells',
-    birth:'September',
-    death: '1950',
-    genre: 'Action'
-  }
-];
 
-//Set up mostly empty user array
-let users=[
-  {
-    user: 'Sample User',
-    favourites: {
-      {title:'Fight Club'},{title:'Forest Gump'}
-    }
-  }
-];
 
-// GET requests
-
+//Add a user
+/* We’ll expect JSON in this format
+{
+  ID: Integer,
+  Username: String,
+  Password: String,
+  Email: String,
+  Birthday: Date
+}*/
 //Root Page
 app.get('/', (req, res) => {
   res.send('Welcome to my movie club!');
@@ -106,63 +44,132 @@ app.get('/', (req, res) => {
 app.get('/documentation.html', (req, res) => {
 });
 
-//List All Movies
+//add new user
+app.post('/users/new/', [],(req, res) => {
+  Users.findOne({Name: req.body.name})
+    .then((user) => {
+      if (user) {
+        return res.status(400).send(req.body.name + ' already exists');
+      } else {
+        Users
+          .create({
+            Name: req.body.Name,
+            Password: req.body.Password,
+            Email: req.body.Email,
+            Birth_Date: req.body.Birth_Date
+          })
+          .then((user) =>{res.status(201).json(user) })
+        .catch((error) => {
+          console.error(error);
+          res.status(500).send('Error: ' + error);
+        })
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send('Error: ' + error);
+    });
+});
+
+//Get director
+app.get('/movies/director/:name',  (req, res) => {
+  Movies.find({"Director.Name" : req.params.name})
+    .then((director) => {
+      res.json(director);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    });
+});
+
+
+//Get movies
 app.get('/movies', (req, res) => {
-  res.json(topMovies);
+  Movies.find()
+  .then((movies) => {
+    res.status(201).json(movies);
+  })
+  .catch((err) => {
+    console.error(err);
+    res.status(500).send("Error: " +err);
+  });
 });
 
-//get movie details by name
-app.get('/movies/title/:title', (req, res) => {
-  let isFilm=(topMovies.find((search) =>
-    { return search.title === req.params.title }));
-    if (isFilm){
-      res.send(isFilm);
+//Get Movie by Title
+app.get('/movies/:Title', (req, res) => {
+  Movies.findOne({Title : req.params.Title})
+  .then((movie) => {
+    res.json(movie);
+  })
+  .catch((err) => {
+    console.error(err);
+    res.status(500).send('Error: ' + err);
+  });
+});
+//Get Movies by Genre
+app.get('/movies/genre/:genre', (req, res) => {
+  Movies.find({"Genre.Name" : req.params.genre})
+  .then((genre) => {
+    res.json(genre);
+  })
+  .catch((err) => {
+    console.error(err);
+    res.status(500).send('Error: ' + err);
+  });
+});
+//Get users
+// Get users by name
+app.get('/users/:Name', (req, res) => {
+  Users.findOne({Name: req.params.Name})
+    .then((users) => {
+      res.json(users);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    });
+});
+// Get a list of users
+app.get('/users', (req, res) => {
+  Users.find()
+    .then((users) => {
+      res.status(201).json(users);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    });
+});
+// Delete User by ID
+app.delete('/users/byid/:_ID', (req, res) => {
+  Users.findOneAndRemove({_id: req.params._ID})
+  .then((_id)=> {
+    if (!_id) {
+      res.status(400).send(req.params._ID + ' was not found');
     } else {
-      res.send('title not found');
+      res.status(200).send(req.params._ID + ' was deleted.');
     }
+  })
+  .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+  });
 });
-
-//Get director Biography by name
-app.get('/movies/director/:director', (req, res) => {
-  let isDirector=(topMovies.find((search) =>
-    { return search.director === req.params.director }));
-    if (isDirector){
-      res.send('found director ' + isDirector.director + ' born ' + isDirector.birth + ', died ' + isDirector.death);
-    } else {
-      res.send('director not found');
-    }
-
-});
-
-//get movie genre by name
-app.get('/movies/genre/:title', (req, res) => {
-  let isFilm=(topMovies.find((search) =>
-    { return search.title === req.params.title }));
-    if (isFilm){
-      res.send('found title ' + req.params.title + ', genre is:' + isFilm.genre);
-    } else {
-      res.send('title not found');
-    }
-});
-
-//add to User favourites
-app.post('/users/addmovie/:user/:favourites', (req, res) => {
-    res.status(201).send('Successfully added to favourites');
-});
-
-//add new User
-app.post('/users/add/:user', (req, res) => {
-      res.status(201).send('Successfully added new User to users');
-});
-
-//delete User
-app.delete('/users/delete/:user', (req, res) =>{
-      res.status(201).send('Successfully deleted users');
-});
-
-//delete User Favourites
-app.delete('/users/deletemovie/:user/:favourites', (req, res) => {
-    res.status(201).send('Successfully deleted from favourites');
+// Delete a user by username
+app.delete('/users/byname/:name', (req, res) => {
+  Users.findOneAndRemove({Name: req.params.name })
+    .then((user) => {
+      if (!user) {
+        res.status(400).send(req.params.name + ' was not found');
+      } else {
+        res.status(200).send(req.params.name + ' was deleted.');
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    });
 });
 
 //Error Trapping
