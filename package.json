@@ -19,6 +19,7 @@
   "homepage": "https://github.com/jbwalton/movie_api#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "mongoose": "^6.0.12",
     "morgan": "^1.10.0"
   },
   "devDependencies": {
