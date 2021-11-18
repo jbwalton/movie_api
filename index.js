@@ -39,13 +39,11 @@ app.post('/users', (req, res) => {
 app.get('/', (req, res) => {
   res.send('Welcome to my movie club!');
 });
-
 //Look at the documentation
 app.get('/documentation.html', (req, res) => {
 });
-
 //add new user
-app.post('/users/new/', [],(req, res) => {
+app.post('/users/new', [],(req, res) => {
   Users.findOne({Name: req.body.name})
     .then((user) => {
       if (user) {
@@ -70,7 +68,6 @@ app.post('/users/new/', [],(req, res) => {
       res.status(500).send('Error: ' + error);
     });
 });
-
 //Get director
 app.get('/movies/director/:name',  (req, res) => {
   Movies.find({"Director.Name" : req.params.name})
@@ -82,8 +79,6 @@ app.get('/movies/director/:name',  (req, res) => {
       res.status(500).send('Error: ' + err);
     });
 });
-
-
 //Get movies
 app.get('/movies', (req, res) => {
   Movies.find()
@@ -95,7 +90,6 @@ app.get('/movies', (req, res) => {
     res.status(500).send("Error: " +err);
   });
 });
-
 //Get Movie by Title
 app.get('/movies/:Title', (req, res) => {
   Movies.findOne({Title : req.params.Title})
@@ -118,7 +112,6 @@ app.get('/movies/genre/:genre', (req, res) => {
     res.status(500).send('Error: ' + err);
   });
 });
-//Get users
 // Get users by name
 app.get('/users/:Name', (req, res) => {
   Users.findOne({Name: req.params.Name})
@@ -140,6 +133,55 @@ app.get('/users', (req, res) => {
       console.error(err);
       res.status(500).send('Error: ' + err);
     });
+});
+// Update user info
+app.put('/users/update/:ID',  (req, res) => {
+  Users.findOneAndUpdate({ _id: req.params.ID }, { $set:
+    {
+      Password: req.body.Password,
+      Email: req.body.Email,
+      Birthday: req.body.Birthday
+    }
+  },
+  { new: true },
+  (err, updatedUser) => {
+      if(err) {
+        console.error(err);
+        res.status(500).send('Error: ' + err);
+      } else {
+        res.json(updatedUser);
+      }
+    });
+  });
+// Add a movie to a users movielist
+app.post('/users/:Username/movies/:MovieID', (req, res) => {
+  Users.findOneAndUpdate({Name: req.params.Username }, {
+     $push: { Movies: req.params.MovieID }
+   },
+   { new: true }, // This line makes sure that the updated document is returned
+  (err, updatedUser) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    } else {
+      res.json(updatedUser);
+    }
+  });
+});
+// Remove a movie from a users movielist
+app.delete('/users/:Username/movies/:MovieID', (req, res) => {
+  Users.findOneAndUpdate({Name: req.params.Username }, {
+     $pull: { Movies: req.params.MovieID }
+   },
+   { new: true }, // This line makes sure that the updated document is returned
+  (err, updatedUser) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error: ' + err);
+    } else {
+      res.json(updatedUser);
+    }
+  });
 });
 // Delete User by ID
 app.delete('/users/byid/:_ID', (req, res) => {
