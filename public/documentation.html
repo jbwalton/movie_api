@@ -35,59 +35,60 @@
         <td>/movies</td>
         <td>GET</td>
         <td>None</td>
-        <td>A JSON object holding data about the movies</td>
+        <td>JSON object holding movie data</td>
       </tr>
       <tr>
         <td>Return single movie Data</td>
         <td>/movies/title/:title</td>
         <td>GET</td>
         <td>None</td>
-        <td>Json object holding movie data</td>
+        <td>JSON object holding movie data</td>
       </tr>
       <tr>
         <td>Return Genre Data</td>
-        <td>/movies/genre/:title</td>
+        <td>/movies/genre/:genre</td>
         <td>GET</td>
         <td>None</td>
-        <td>Json object holding movie data</td>
+        <td>JSON object holding movie data</td>
       </tr>
       <tr>
         <td>Return Director Data</td>
         <td>/movies/director/:director</td>
         <td>GET</td>
         <td>None</td>
-        <td>Json object holding movie data</td>
+        <td>JSON object holding movie data</td>
       </tr>
       <tr>
         <td>New User Registration</td>
-        <td>/users/add/:user</td>
+        <td>/users/new/</td>
         <td>POST</td>
-        <td>JSON OBject holding new user data</td>
-        <td>JSON OBject holding new user data</td>
+        <td>{<br>
+        "Name:String"<br>
+        "Password:String"<br>
+        "Email:String"<br>
+        "Birth_Date:Date"<br>
+        }<br>
+        </td>
+        <td>JSON object holding new user data</td>
       </tr>
       <tr>
         <td>Add a Movie to favourites</td>
-        <td>/users/addmovie/:user/:favourites</td>
+        <td>/users/:username/movies/:MovieID</td>
         <td>POST</td>
-        <td>JSON Object holding favourite movie information<br>
-          {
-            &nbsp;user: 'Sample User',<br>
-            &nbsp;&nbsp;favourites: {<br>
-            &nbsp;&nbsp;&nbsp;{title:'Fight Club'},{title:'Forest Gump'}<br>
-            &nbsp;}<br>
-          }</td>
+        <td>None</td>
         <td>Text Response</td>
       </tr>
       <tr>
         <td>Remove A Movie from favourites</td>
-        <td>/users/deletemovie/:user/:favourites</td>
+        <td>/users/:username/movies/:MovieID</td>
         <td>DELETE</td>
         <td>None</td>
         <td>Text Response</td>
       </tr>
       <tr>
         <td>Delete Existing User</td>
-        <td>/users/delete/:user</td>
+        <td>/users/byname/:user<br>
+        /users/byID/:user</td>
         <td>DELETE</td>
         <td>None</td>
         <td>Text Response</td>
