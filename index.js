@@ -17,8 +17,12 @@ app.use(morgan('common'));
 
 //look in public folder first for requests
 app.use(express.static('public'));
-
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+
+let auth = require('./auth.js')(app);
+const passport = require('passport');
+require('./passport.js');
 /*
 app.post('/users', (req, res) => {
   res.send('Successful POST request creating a new user');
@@ -80,7 +84,7 @@ app.get('/movies/director/:name',  (req, res) => {
     });
 });
 //Get movies
-app.get('/movies', (req, res) => {
+app.get('/movies',  passport.authenticate('jwt', { session: false }), (req, res) => {
   Movies.find()
   .then((movies) => {
     res.status(201).json(movies);
