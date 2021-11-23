@@ -250,11 +250,7 @@ app.use((req, res, next) => {
     res.status(404).send('Something Broke')
 });
 // listen for requests
-/*
-app.listen(8080, () => {
-  console.log('Your app is listening on port 8080.');
-});
-*/
+
 
 const port = process.env.PORT || 8080;
 app.listen(port, '0.0.0.0',() => {
